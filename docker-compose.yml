@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   nginx:
@@ -10,12 +10,12 @@ services:
     networks:
       - web
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traffic-monitor.rule=Host(`traffic-monitor.nackz.dev`) && PathPrefix(`/privacy`)"
-      - "traefik.http.routers.traffic-monitor.entrypoints=websecure"
-      - "traefik.http.routers.traffic-monitor.tls=true"
-      - "traefik.http.routers.traffic-monitor.tls.certresolver=le"
-      - "traefik.http.services.traffic-monitor.loadbalancer.server.port=80"
+      - traefik.enable=true
+      - traefik.http.routers.traffic-monitor.rule=Host(`traffic-monitor.nackz.dev`) && PathPrefix(`/privacy`)
+      - traefik.http.routers.traffic-monitor.entrypoints=websecure
+      - traefik.http.routers.traffic-monitor.tls=true
+      - traefik.http.routers.traffic-monitor.tls.certresolver=le
+      - traefik.http.services.traffic-monitor.loadbalancer.server.port=80
     depends_on:
       fetcher:
         condition: service_healthy
