@@ -6,7 +6,7 @@ services:
     container_name: traffic-monitor-nginx
     restart: unless-stopped
     volumes:
-      - traffic-monitor-/usr/share/nginx/html:ro
+      - html:/usr/share/nginx/html:ro
     networks:
       - web
     labels:
@@ -16,31 +16,24 @@ services:
       - traefik.http.routers.traffic-monitor.tls=true
       - traefik.http.routers.traffic-monitor.tls.certresolver=le
       - traefik.http.services.traffic-monitor.loadbalancer.server.port=80
-    depends_on:
-      fetcher:
-        condition: service_healthy
 
-  fetcher:
-    image: alpine/git:latest
-    container_name: traffic-monitor-fetcher
+  git-sync:
+    image: k8s.gcr.io/git-sync/git-sync:latest
+    container_name: traffic-monitor-git-sync
     restart: unless-stopped
     volumes:
-      - traffic-monitor-/data
+      - html:/git
+    environment:
+      - GIT_SYNC_REPO=https://github.com/n4ckz/traffic-monitor-privacy.git
+      - GIT_SYNC_DEST=.
+      - GIT_SYNC_BRANCH=main
+      - GIT_SYNC_PERIOD=300s
+      - GIT_SYNC_ROOT=/git
     networks:
       - web
-    command: >
-      sh -c "
-        git clone https://github.com/n4ckz/traffic-monitor-privacy.git /data || 
-        (rm -rf /data/* && git clone https://github.com/n4ckz/traffic-monitor-privacy.git /data) &&
-        while true; do sleep 300; git -C /data pull origin main; done"
-    healthcheck:
-      test: ["CMD", "test", "-f", "/data/index.html"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 volumes:
-  traffic-monitor-
+  html:
 
 networks:
   web:
