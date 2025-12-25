@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: traffic-monitor-nginx
+    restart: unless-stopped
+    volumes:
+      - traffic-monitor-/usr/share/nginx/html:ro
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traffic-monitor.rule=Host(`traffic-monitor.nackz.dev`) && PathPrefix(`/privacy`)"
+      - "traefik.http.routers.traffic-monitor.entrypoints=websecure"
+      - "traefik.http.routers.traffic-monitor.tls=true"
+      - "traefik.http.routers.traffic-monitor.tls.certresolver=le"
+      - "traefik.http.services.traffic-monitor.loadbalancer.server.port=80"
+    depends_on:
+      fetcher:
+        condition: service_healthy
+
+  fetcher:
+    image: alpine/git:latest
+    container_name: traffic-monitor-fetcher
+    restart: unless-stopped
+    environment:
+      - GIT_REPO=https://n4ckz:${GIT_TOKEN}@github.com/n4ckz/traffic-monitor-privacy.git
+    volumes:
+      - traffic-monitor-/data
+    command: >
+      sh -c "
+        git clone $${GIT_REPO} /data || (rm -rf /data/* && git clone $${GIT_REPO} /data) &&
+        while true; do sleep 300; git -C /data pull origin main; done"
+    healthcheck:
+      test: ["CMD", "test", "-f", "/data/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  traffic-monitor-
+
+networks:
+  web:
+    name: traefik_web
+    external: true
