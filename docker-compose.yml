@@ -5,8 +5,6 @@ services:
     image: nginx:alpine
     container_name: traffic-monitor-nginx
     restart: unless-stopped
-    volumes:
-      - html:/usr/share/nginx/html:ro
     networks:
       - web
     labels:
@@ -16,24 +14,8 @@ services:
       - traefik.http.routers.traffic-monitor.tls=true
       - traefik.http.routers.traffic-monitor.tls.certresolver=le
       - traefik.http.services.traffic-monitor.loadbalancer.server.port=80
-
-  git-sync:
-    image: k8s.gcr.io/git-sync/git-sync:latest
-    container_name: traffic-monitor-git-sync
-    restart: unless-stopped
     volumes:
-      - html:/git
-    environment:
-      - GIT_SYNC_REPO=https://github.com/n4ckz/traffic-monitor-privacy.git
-      - GIT_SYNC_DEST=.
-      - GIT_SYNC_BRANCH=main
-      - GIT_SYNC_PERIOD=300s
-      - GIT_SYNC_ROOT=/git
-    networks:
-      - web
-
-volumes:
-  html:
+      - ./:/usr/share/nginx/html:ro
 
 networks:
   web:
