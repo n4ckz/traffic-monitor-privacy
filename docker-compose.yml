@@ -5,17 +5,17 @@ services:
     image: nginx:alpine
     container_name: traffic-monitor-nginx
     restart: unless-stopped
+    volumes:
+      - .:/usr/share/nginx/html:ro
     networks:
       - web
     labels:
       - traefik.enable=true
-      - traefik.http.routers.traffic-monitor.rule=Host(`traffic-monitor.nackz.dev`) && PathPrefix(`/privacy`)
+      - traefik.http.routers.traffic-monitor.rule=Host(`traffic-monitor.nackz.dev`)
       - traefik.http.routers.traffic-monitor.entrypoints=websecure
       - traefik.http.routers.traffic-monitor.tls=true
       - traefik.http.routers.traffic-monitor.tls.certresolver=le
       - traefik.http.services.traffic-monitor.loadbalancer.server.port=80
-    volumes:
-      - ./:/usr/share/nginx/html:ro
 
 networks:
   web:
