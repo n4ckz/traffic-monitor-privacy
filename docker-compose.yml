@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  nginx:
+  traffic-monitor:
     image: nginx:alpine
     container_name: traffic-monitor-nginx
     restart: unless-stopped
