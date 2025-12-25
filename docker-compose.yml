@@ -24,13 +24,14 @@ services:
     image: alpine/git:latest
     container_name: traffic-monitor-fetcher
     restart: unless-stopped
-    environment:
-      - GIT_REPO=https://n4ckz:${GIT_TOKEN}@github.com/n4ckz/traffic-monitor-privacy.git
     volumes:
       - traffic-monitor-/data
+    networks:
+      - web
     command: >
       sh -c "
-        git clone $${GIT_REPO} /data || (rm -rf /data/* && git clone $${GIT_REPO} /data) &&
+        git clone https://github.com/n4ckz/traffic-monitor-privacy.git /data || 
+        (rm -rf /data/* && git clone https://github.com/n4ckz/traffic-monitor-privacy.git /data) &&
         while true; do sleep 300; git -C /data pull origin main; done"
     healthcheck:
       test: ["CMD", "test", "-f", "/data/index.html"]
@@ -43,5 +44,5 @@ volumes:
 
 networks:
   web:
-    name: traefik_web
     external: true
+    name: traefik_web
