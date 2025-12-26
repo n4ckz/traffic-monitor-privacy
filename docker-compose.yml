@@ -6,7 +6,7 @@ services:
     container_name: traffic-monitor-nginx
     restart: unless-stopped
     volumes:
-      - .:/usr/share/nginx/html:ro
+      - ./traffic-monitor-privacy:/usr/share/nginx/html:ro
     networks:
       - web
     labels:
